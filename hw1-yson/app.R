@@ -5,7 +5,7 @@ library(stringr)
 library(tools)
 
 # Set working directory
-setwd("~/Documents/GitHub/hw1-yson/hw1-yson")
+#setwd("~/Documents/GitHub/hw1-yson/hw1-yson")
 
 # Read data
 cope <- read.csv("COPE.csv", head = T) 
