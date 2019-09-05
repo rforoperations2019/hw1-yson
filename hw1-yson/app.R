@@ -46,7 +46,7 @@ ui <- fluidPage(
                     label = "Y-axis:",
                     choices = c("Satisfaction with light level for computer work" = "light_level_for_computer_work", 
                                 "Satisfaction with light level for paper-based work" = "light_level_for_paper_work", 
-                                "Satisfaction wiht overall lighting quality" = "overall_lighting_quality"), 
+                                "Satisfaction with overall lighting quality" = "overall_lighting_quality"), 
                     selected = "overall_lighting_quality"),
             
         # Select variable for x-axis ----------------------------------
@@ -54,60 +54,87 @@ ui <- fluidPage(
                     label = "X-axis:",
                     choices = c("Satisfaction with light level for computer work" = "light_level_for_computer_work", 
                                 "Satisfaction with light level for paper-based work" = "light_level_for_paper_work", 
-                                "Satisfaction wiht overall lighting quality" = "overall_lighting_quality"), 
+                                "Satisfaction with overall lighting quality" = "overall_lighting_quality"), 
                     selected = "light_level_for_computer_work"),
       
       # Enter text for plot title ---------------------------------------------
       textInput(inputId = "plot_title", 
                 label = "Plot title", 
-                placeholder = "Enter text to be used as plot title")
+                placeholder = "Enter text to be used as plot title"),
+      
+      # Select sample size ----------------------------------------------------
+      sliderInput(inputId = "n_samp", 
+                   label = "Sample size:", 
+                   min = 50, max = nrow(cope), 
+                   value = 100)
 
     ),
 
     # Show a plot of the generated distribution
     mainPanel(
-        
+
       # Box plot
       plotOutput("boxplot"),
       br(), br(),    # a little bit of visual separation
       
-      # Bar chart_ gender
-      plotOutput("barGender"),
-      br(), br(),    # a little bit of visual separation      
-      
-      # Bar chart_ age
-      plotOutput("barAge")
+      # Bar chart
+      fluidRow(
+        column(6,plotOutput("barGender")
+        ),
+        column(6,plotOutput("barAge")
+        )
+      )        
     )
   )
 )
 
 # Define server logic
-server <- function(input, output) {
-
-    output$barGender <- renderPlot({
-        ggplot(cope) + geom_bar(aes(factor(gender))) +
-            scale_x_discrete("Gender", labels = c("Female","Male"))
-    })
+server <- function(input, output,session) {
+  
+  # Update the maximum allowed n_samp for selected type movies ------
+  observe({
+    updateNumericInput(session, 
+                       inputId = "n_samp",
+                       value = min(100, nrow(cope)),
+                       max = nrow(cope)
+    )
+  })
+  
+  # Create sampled dataframe
+  cope_sample <- reactive({ 
+    req(input$n_samp) # ensure availablity of value before proceeding
+    sample_n(cope, input$n_samp)
+  })  
+  
+  # show bar plot _ gender distribution 
+  output$barGender <- renderPlot({
+    ggplot(cope_sample()) + geom_bar(aes(factor(gender))) +
+      scale_x_discrete("Gender", labels = c("Female","Male")) +
+      labs(title = "Gender Distribution in Sampled Data")
+  })
     
-    output$barAge <- renderPlot({
-        ggplot(cope) + geom_bar(aes(factor(age))) +
-            scale_x_discrete("Age", labels = c("18-29","30-39","40-49","50-59","60-69","70+"))
-    })
+  # show bar plot _ age distribution
+  output$barAge <- renderPlot({
+    ggplot(cope_sample()) + geom_bar(aes(factor(age))) +
+      scale_x_discrete("Age", labels = c("18-29","30-39","40-49","50-59","60-69","70+")) +
+      labs(title = "Age Distribution in Sampled Data")
+  })
     
-    # Convert plot_title toTitleCase ----------------------------------
-    pretty_plot_title <- reactive({ toTitleCase(input$plot_title) })
+  # Convert plot_title toTitleCase ----------------------------------
+  pretty_plot_title <- reactive({ toTitleCase(input$plot_title) })
     
-    # Show histogram
-    output$boxplot <- renderPlot({
-        ggplot(data = cope) +
-          geom_boxplot(aes_string(input$x, input$y, group = input$x)) +
-            scale_x_discrete(toTitleCase(str_replace_all(input$x, "_", " ")),
-                              labels= axisTitles.7sat, limit = c("1","2","3","4","5","6","7")) +
-            scale_y_continuous(toTitleCase(str_replace_all(input$y, "_", " ")),
-                               breaks = c(1,2,3,4,5,6,7), label = axisTitles.7sat) +
-            theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-            labs(title = pretty_plot_title())
-    })
+  # Show boxplot
+  output$boxplot <- renderPlot({
+    ggplot(data = cope_sample()) +
+      geom_boxplot(aes_string(input$x, input$y, group = input$x)) +
+      scale_x_discrete(paste("Satisfaction with", toTitleCase(str_replace_all(input$x, "_", " "))),
+                       labels= axisTitles.7sat, 
+                       limit = c("1","2","3","4","5","6","7")) +
+      scale_y_continuous(paste("Satisfaction with", toTitleCase(str_replace_all(input$y, "_", " "))),
+                         breaks = c(1,2,3,4,5,6,7), label = axisTitles.7sat) +
+      theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+      labs(title = pretty_plot_title())
+  })
 }
 
 # Run the application 
