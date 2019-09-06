@@ -75,7 +75,7 @@ ui <- fluidPage(
 
       # Box plot
       plotOutput("boxplot"),
-      br(), br(),    # a little bit of visual separation
+      br(), br(),    # visual separation
       
       # Bar chart
       fluidRow(
@@ -83,7 +83,11 @@ ui <- fluidPage(
         ),
         column(6,plotOutput("barAge")
         )
-      )        
+      ),
+      br(), br(),    # visual separation
+      
+      # Data table
+      DT::dataTableOutput(outputId = "copetable")
     )
   )
 )
@@ -120,7 +124,7 @@ server <- function(input, output,session) {
       labs(title = "Age Distribution in Sampled Data")
   })
     
-  # Convert plot_title toTitleCase ----------------------------------
+  # Convert plot_title toTitleCase
   pretty_plot_title <- reactive({ toTitleCase(input$plot_title) })
     
   # Show boxplot
@@ -134,7 +138,14 @@ server <- function(input, output,session) {
                          breaks = c(1,2,3,4,5,6,7), label = axisTitles.7sat) +
       theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
       labs(title = pretty_plot_title())
-  })
+    })
+    
+  # Print data table
+  output$copetable <- DT::renderDataTable(
+    DT::datatable(data = cope_sample(), 
+                  options = list(pageLength = 10), 
+                  rownames = FALSE)
+  )
 }
 
 # Run the application 
