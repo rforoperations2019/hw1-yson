@@ -75,21 +75,25 @@ ui <- fluidPage(
       
       # Show raw data
       checkboxInput(inputId = "view_data",
-                    label = "View raw data",
+                    label = "View sampled data",
                     value = FALSE),
       
       # action button
       actionButton(inputId = "go",
-                   label = "Get data description!")
+                   label = "View data description!"),
+      
+      # download button
+      downloadButton(outputId = "downloadData",
+                     label = "Download current sampled data!")
     ),
 
     # Show a plot of the generated distribution
     mainPanel(
       # text
-      verbatimTextOutput("text"),
+      verbatimTextOutput(outputId = "text"),
       
       # Box plot
-      plotOutput("boxplot"),
+      plotOutput(outputId = "boxplot"),
       br(), br(),    # visual separation
       
       # Bar chart
@@ -109,6 +113,13 @@ ui <- fluidPage(
 
 # Define server logic
 server <- function(input, output, session) {
+  
+  #download data
+  output$downloadData <- downloadHandler(
+    filename = "surveydata.csv",
+    content = function(file) {
+      write.csv(cope_sample(), file)
+    })
   
   # event
   observeEvent(input$go, {

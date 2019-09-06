@@ -5,8 +5,8 @@ account: youngjoo
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 1154811
-bundleId: 2390206
+bundleId: 2392442
 url: https://youngjoo.shinyapps.io/hw1-yson/
-when: 1567739079.03992
+when: 1567793812.07168
 asMultiple: FALSE
 asStatic: FALSE
