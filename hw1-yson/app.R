@@ -11,16 +11,17 @@ library(tools)
 cope <- read.csv("COPE.csv", head = T) 
 
 # Three visual satisfaction + Demographic
-cope <- na.omit(select(cope,c("X1","X10","X18","X22","X23"))) 
-names(cope) <- c("light_level_for_paper_work","light_level_for_computer_work",
-               "overall_lighting_quality","age","gender")
+cope <- na.omit(select(cope,c("X1", "X6","X10", "X16","X18","X22","X23"))) 
+names(cope) <- c("light_level_for_paper_work", "visual_privacy",
+                 "light_level_for_computer_work", "access_to_a_seated_view",
+                 "overall_lighting_quality","age","gender")
 # Vector
-for (i in 1:3){
+for (i in 1:5){
     cope[,i] <- as.vector(cope[,i])
 }
 
 # Factor
-for (i in 4:5){
+for (i in 6:7){
     cope[,i] <- factor(cope[,i])
 }
 
@@ -45,16 +46,20 @@ ui <- fluidPage(
       selectInput(inputId = "y", 
                    label = "Y-axis:",
                   choices = c("Satisfaction with light level for computer work" = "light_level_for_computer_work", 
-                                "Satisfaction with light level for paper-based work" = "light_level_for_paper_work", 
-                                "Satisfaction with overall lighting quality" = "overall_lighting_quality"), 
+                              "Satisfaction with seated view"= "access_to_a_seated_view",
+                              "Satisfaction with visual privacy" = "visual_privacy",
+                              "Satisfaction with light level for paper-based work" = "light_level_for_paper_work", 
+                              "Satisfaction with overall lighting quality" = "overall_lighting_quality"), 
                   selected = "overall_lighting_quality"),
             
       # Select variable for x-axis ----------------------------------
       selectInput(inputId = "x", 
                   label = "X-axis:",
-                  choices = c("Satisfaction with light level for computer work" = "light_level_for_computer_work", 
-                                "Satisfaction with light level for paper-based work" = "light_level_for_paper_work", 
-                                "Satisfaction with overall lighting quality" = "overall_lighting_quality"), 
+                  choices = c("Satisfaction with light level for computer work" = "light_level_for_computer_work",
+                              "Satisfaction with seated view"= "access_to_a_seated_view", 
+                              "Satisfaction with visual privacy" = "visual_privacy",
+                              "Satisfaction with light level for paper-based work" = "light_level_for_paper_work", 
+                              "Satisfaction with overall lighting quality" = "overall_lighting_quality"), 
                   selected = "light_level_for_computer_work"),
       
       # Enter text for plot title ---------------------------------------------
