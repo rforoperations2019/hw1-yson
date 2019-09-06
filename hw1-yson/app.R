@@ -34,28 +34,28 @@ axisTitles.7sat <- c('1'='Very Dissatisfied','2'='Dissatisfied ',
 ui <- fluidPage(
 
   # Application title
-  titlePanel("Visual Satisfaction Responses"),
+  titlePanel("Survey Result"),
 
     # Sidebar with a slider input for number of bins 
     sidebarLayout(
         
       sidebarPanel(
             
-        # Select variable for y-axis ----------------------------------
+      # Select variable for y-axis ----------------------------------
       selectInput(inputId = "y", 
-                    label = "Y-axis:",
-                    choices = c("Satisfaction with light level for computer work" = "light_level_for_computer_work", 
+                   label = "Y-axis:",
+                  choices = c("Satisfaction with light level for computer work" = "light_level_for_computer_work", 
                                 "Satisfaction with light level for paper-based work" = "light_level_for_paper_work", 
                                 "Satisfaction with overall lighting quality" = "overall_lighting_quality"), 
-                    selected = "overall_lighting_quality"),
+                  selected = "overall_lighting_quality"),
             
-        # Select variable for x-axis ----------------------------------
-       selectInput(inputId = "x", 
-                    label = "X-axis:",
-                    choices = c("Satisfaction with light level for computer work" = "light_level_for_computer_work", 
+      # Select variable for x-axis ----------------------------------
+      selectInput(inputId = "x", 
+                  label = "X-axis:",
+                  choices = c("Satisfaction with light level for computer work" = "light_level_for_computer_work", 
                                 "Satisfaction with light level for paper-based work" = "light_level_for_paper_work", 
                                 "Satisfaction with overall lighting quality" = "overall_lighting_quality"), 
-                    selected = "light_level_for_computer_work"),
+                  selected = "light_level_for_computer_work"),
       
       # Enter text for plot title ---------------------------------------------
       textInput(inputId = "plot_title", 
@@ -66,13 +66,19 @@ ui <- fluidPage(
       sliderInput(inputId = "n_samp", 
                    label = "Sample size:", 
                    min = 50, max = nrow(cope), 
-                   value = 100)
+                   value = 100),
+      
+      # action button
+      actionButton(inputId = "go",
+                   label = "Get data description!")
 
     ),
 
     # Show a plot of the generated distribution
     mainPanel(
-
+      # text
+      verbatimTextOutput("text"),
+      
       # Box plot
       plotOutput("boxplot"),
       br(), br(),    # visual separation
@@ -93,7 +99,13 @@ ui <- fluidPage(
 )
 
 # Define server logic
-server <- function(input, output,session) {
+server <- function(input, output, session) {
+  
+  # event
+  observeEvent(input$go, {
+    output$text <- renderText({"These are survey responses collected in office. 
+      Workers were asked how they felt about visual environmental quality."})
+  })
   
   # Update the maximum allowed n_samp for selected type movies ------
   observe({
