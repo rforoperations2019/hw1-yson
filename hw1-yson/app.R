@@ -34,7 +34,7 @@ axisTitles.7sat <- c('1'='Very Dissatisfied','2'='Dissatisfied ',
 ui <- fluidPage(
 
   # Application title
-  titlePanel("Survey Result"),
+  titlePanel("Survey Results"),
 
     # Sidebar with a slider input for number of bins 
     sidebarLayout(
@@ -68,10 +68,14 @@ ui <- fluidPage(
                    min = 50, max = nrow(cope), 
                    value = 100),
       
+      # Show raw data
+      checkboxInput(inputId = "view_data",
+                    label = "View raw data",
+                    value = FALSE),
+      
       # action button
       actionButton(inputId = "go",
                    label = "Get data description!")
-
     ),
 
     # Show a plot of the generated distribution
@@ -104,7 +108,7 @@ server <- function(input, output, session) {
   # event
   observeEvent(input$go, {
     output$text <- renderText({"These are survey responses collected in office. 
-      Workers were asked how they felt about visual environmental quality."})
+      Workers were asked how they felt about visual quality."})
   })
   
   # Update the maximum allowed n_samp for selected type movies ------
@@ -154,9 +158,11 @@ server <- function(input, output, session) {
     
   # Print data table
   output$copetable <- DT::renderDataTable(
-    DT::datatable(data = cope_sample(), 
-                  options = list(pageLength = 10), 
-                  rownames = FALSE)
+    if(input$view_data){
+      DT::datatable(data = cope_sample(), 
+                    options = list(pageLength = 10), 
+                    rownames = FALSE)      
+    }
   )
 }
 
