@@ -8,13 +8,15 @@ library(tools)
 #setwd("~/Documents/GitHub/hw1-yson/hw1-yson")
 
 # Read data
-cope <- read.csv("COPE.csv", head = T) 
+cope <- read.csv("visual.csv", head = T) 
 
 # Three visual satisfaction + Demographic
-cope <- na.omit(select(cope,c("X1", "X6","X10", "X16","X18","X22","X23"))) 
+cope <- na.omit(select(cope,c("Q1", "Q6","Q10", "Q16","Q18","Q22","Q23",
+                              "LightMon.OFF","LightKey.OFF","LightSurf.OFF"))) 
 names(cope) <- c("light_level_for_paper_work", "visual_privacy",
                  "light_level_for_computer_work", "access_to_a_seated_view",
-                 "overall_lighting_quality","age","gender")
+                 "overall_lighting_quality","age","gender","light_level_on_monitor",
+                 "light_level_on_keyboard", "light_level_on_worksurface")
 # Vector
 for (i in 1:5){
     cope[,i] <- as.vector(cope[,i])
@@ -96,6 +98,10 @@ ui <- fluidPage(
       plotOutput(outputId = "boxplot"),
       br(), br(),    # visual separation
       
+      # Scatter Plot
+      plotOutput("point"),
+      br(), br(),    # visual separation      
+      
       # Bar chart
       fluidRow(
         column(6,plotOutput("barGender")
@@ -154,6 +160,14 @@ server <- function(input, output, session) {
     ggplot(cope_sample()) + geom_bar(aes(factor(age))) +
       scale_x_discrete("Age", labels = c("18-29","30-39","40-49","50-59","60-69","70+")) +
       labs(title = "Age Distribution in Sampled Data")
+  })
+  
+  # scatter plot
+  output$point <- renderPlot({
+    ggplot(cope_sample()) + geom_point(aes(light_level_on_monitor,light_level_on_keyboard)) +
+      labs(x = toTitleCase(str_replace_all("light_level_on_monitor", "_", " ")),
+           y = toTitleCase(str_replace_all("light_level_on_keyboard", "_", " ")),
+           title = "Measured light level (lux) distribution")
   })
     
   # Convert plot_title toTitleCase
